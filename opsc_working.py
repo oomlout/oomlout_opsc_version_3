@@ -23,7 +23,8 @@ objects = [
 
 objects = []
 #objects.append({'shape': 'cube', 'type': 'positive', 'size': [10,5,23]})
-objects.append({'shape': 'gear', 'type': 'positive', 'size': [10,5,23]})
+#objects.append({'shape': 'gear', 'type': 'positive', 'size': [10,5,23]})
+objects.append({'shape': 'pulley_gt2', 'type': 'positive', 'number_of_teeth': 20})
 
 
 #objects = opsc.test(20)

@@ -203,7 +203,7 @@ def get_opsc_item(params):
     # An array of function names for basic shapes
     basic_shapes = ['cube', 'sphere', 'cylinder']
     # An array of function names for other shapes
-    other_shapes = ['hole', 'slot', 'slot_small', 'text_hollow', "tube", 'tray', 'rounded_rectangle', 'rounded_rectangle_extra', 'sphere_rectangle', 'countersunk', 'polyg', 'polyg_tube', 'polyg_tube_half', 'bearing', 'oring', 'vpulley', 'd_shaft', 'gear']
+    other_shapes = ['hole', 'slot', 'slot_small', 'text_hollow', "tube", 'tray', 'rounded_rectangle', 'rounded_rectangle_extra', 'sphere_rectangle', 'countersunk', 'polyg', 'polyg_tube', 'polyg_tube_half', 'bearing', 'oring', 'vpulley', 'd_shaft', 'gear', 'pulley_gt2']
 
     # Convert radius to r if present, and remove radius from the params dictionary
     if 'radius' in params:
@@ -402,8 +402,6 @@ def gear(params):
 
     return involute_gear.gear(number_of_teeth=number_of_teeth, circular_pitch=circular_pitch, diametral_pitch=diametral_pitch, pressure_angle=pressure_angle, clearance=clearance, gear_thickness=gear_thickness, rim_thickness=rim_thickness, rim_width=rim_width, hub_thickness=hub_thickness, hub_diameter=hub_diameter, bore_diameter=bore_diameter, circles=circles, backlash=backlash, twist=twist, involute_facets=involute_facets, flat=flat)
 
-
-
 def countersunk(params):
     p2 = copy.deepcopy(params)
     counter_rad = p2['r']
@@ -514,6 +512,12 @@ def slot(params):
     leftObj = get_opsc_item(left)
     rightObj = get_opsc_item(right)
     return hull()(leftObj, rightObj)
+
+def pulley_gt2(params):
+    number_of_teeth = params.get("number_of_teeth", 24)
+    pulley_gt2_scad = import_scad("pulley_gt2.scad")
+
+    return pulley_gt2_scad.pulley_gt2(number_of_teeth=number_of_teeth)
 
 def rounded_rectangle(params): 
     m = params.get("m", "")  
