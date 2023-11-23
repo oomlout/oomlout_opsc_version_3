@@ -38,7 +38,11 @@ def opsc_make_object(filename, objects, save_type="none",resolution=50, layers =
             os.makedirs(path)
         final_object = opsc_get_object(objects, mode = mode)
         # Save the final object to the specified filename    
-        scad_render_to_file(final_object, filename, file_header='$fn = %s;' % resolution, include_orig_code=False)
+        #file_header = """$fn = %s;
+#use <MCAD/involute_gears.scad>
+#"""
+        file_header = "$fn = %s;"
+        scad_render_to_file(final_object, filename, file_header=file_header % resolution, include_orig_code=False)
         if save_type == "all":
             saveToAll(filename, render=render)
         elif save_type == "dxf":
@@ -199,7 +203,7 @@ def get_opsc_item(params):
     # An array of function names for basic shapes
     basic_shapes = ['cube', 'sphere', 'cylinder']
     # An array of function names for other shapes
-    other_shapes = ['hole', 'slot', 'slot_small', 'text_hollow', "tube", 'tray', 'rounded_rectangle', 'rounded_rectangle_extra', 'sphere_rectangle', 'countersunk', 'polyg', 'polyg_tube', 'polyg_tube_half', 'bearing', 'oring', 'vpulley', 'd_shaft']
+    other_shapes = ['hole', 'slot', 'slot_small', 'text_hollow', "tube", 'tray', 'rounded_rectangle', 'rounded_rectangle_extra', 'sphere_rectangle', 'countersunk', 'polyg', 'polyg_tube', 'polyg_tube_half', 'bearing', 'oring', 'vpulley', 'd_shaft', 'gear']
 
     # Convert radius to r if present, and remove radius from the params dictionary
     if 'radius' in params:
@@ -311,7 +315,12 @@ def opsc_easy(type, shape, **kwargs):
         'type': type,
         'shape': shape
     }
-    for param in ['color','center','comment','size', 'r', 'radius', 'r1', 'r2', 'd', 'h', 'rw', 'rh', 'dw', 'dh', 'pos', 'x', 'y', 'z', 'rot', 'rotX', 'rotY', 'rotZ', "w", "inclusion", 'sides', 'height', 'width', "m", "id", "od", "depth", "exclude_clearance", "clearance", "points","text","valign","halign","font","inset","wall_thickness","extra","wall_thickness", "loc", "objects"]:
+    params_allowed = []
+    params_base = ['color','center','comment','size', 'r', 'radius', 'r1', 'r2', 'd', 'h', 'rw', 'rh', 'dw', 'dh', 'pos', 'x', 'y', 'z', 'rot', 'rotX', 'rotY', 'rotZ', "w", "inclusion", 'sides', 'height', 'width', "m", "id", "od", "depth", "exclude_clearance", "clearance", "points","text","valign","halign","font","inset","wall_thickness","extra","wall_thickness", "loc", "objects"]
+    params_allowed.extend(params_base)
+    params_gear = ['number_of_teeth', 'circular_pitch', 'diametral_pitch', 'pressure_angle', 'clearance', 'gear_thickness', 'rim_thickness', 'rim_width', 'hub_thickness', 'hub_diameter', 'bore_diameter', 'circles', 'backlash', 'twist', 'involute_facets', 'flat']
+    params_allowed.extend(params_gear)
+    for param in params_allowed:
         if param in kwargs:
             obj[param] = kwargs[param]
     return obj
@@ -369,6 +378,29 @@ def tube(params):
     outside = get_opsc_item(p2)
     return difference()(outside,inside)
 
+def gear(params):
+    number_of_teeth = params.get("number_of_teeth", 24)
+    circular_pitch = params.get("circular_pitch", False) # couldn't figure this one out
+    diametral_pitch = params.get("diametral_pitch", 0.533333) #(teeth / diameter mm) gear 15 mm wide has 8 teeth
+    pressure_angle = params.get("pressure_angle", 20) #internet thinks legos is about 20
+    clearance = params.get("clearance", 1)
+    gear_thickness = params.get("gear_thickness", None)
+    if gear_thickness == None:
+        gear_thickness = params.get("depth", 10)
+    rim_thickness = params.get("rim_thickness", gear_thickness)
+    rim_width = params.get("rim_width", 0)
+    hub_thickness = params.get("hub_thickness", 0)
+    hub_diameter = params.get("hub_diameter", 0)
+    bore_diameter = params.get("bore_diameter", 0)
+    circles = params.get("circles", 0)
+    backlash = params.get("backlash", 1)
+    twist = params.get("twist", 0)
+    involute_facets = params.get("involute_facets", 0)
+    flat = params.get("flat", False)
+
+    involute_gear = import_scad("MCAD/involute_gears.scad")
+
+    return involute_gear.gear(number_of_teeth=number_of_teeth, circular_pitch=circular_pitch, diametral_pitch=diametral_pitch, pressure_angle=pressure_angle, clearance=clearance, gear_thickness=gear_thickness, rim_thickness=rim_thickness, rim_width=rim_width, hub_thickness=hub_thickness, hub_diameter=hub_diameter, bore_diameter=bore_diameter, circles=circles, backlash=backlash, twist=twist, involute_facets=involute_facets, flat=flat)
 
 
 

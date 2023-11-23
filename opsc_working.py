@@ -1,5 +1,5 @@
 import opsc
-import opsc_library_gen
+
 
 
 
@@ -21,11 +21,12 @@ objects = [
     {'shape': 'my_custom_object', 'type': 'positive', 'param1': 10, 'param2': 20},
 ]
 
+objects = []
+#objects.append({'shape': 'cube', 'type': 'positive', 'size': [10,5,23]})
+objects.append({'shape': 'gear', 'type': 'positive', 'size': [10,5,23]})
 
 
+#objects = opsc.test(20)
 
-objects = opsc.test(20)
+opsc.opsc_make_object('outputs/my_object.scad', objects, save_type="all")
 
-#opsc.opsc_make_object('outputs/my_object.scad', objects, save_all=True)
-
-opsc_library_gen.gen_library({},save_file=True)
