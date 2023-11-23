@@ -24,7 +24,7 @@
 //number_of_teeth_test = 60; // [10:100]
 profile = 12; // [1:MXL, 2:40DP, 3:XL, 4:H, 5:T2.5, 6:T5, 7:T10, 8:AT5, 9:HTD_3mm, 10:HTD_5mm, 11:HTD_8mm, 12:GT2_2mm, 13:GT2_3mm, 14:GT2_5mm]
 motor_shaft_diameter = 0; // (in mm)
-toothed_part_length = 10; // [3:30] (in mm)
+//toothed_part_length = 10; // [3:30] (in mm)
 base_height = 0; // [0:30] (in mm, 6 is typical)
 base_diameter = 0;   // [10:50] (in mm)
 
@@ -33,7 +33,7 @@ base_diameter = 0;   // [10:50] (in mm)
 // ---------------------------
 belt_retainer = 0; // [0:No, 1:Yes]
 retainer_height_p = 1.0; // [0.5:Tiny (0.5mm), 1:Small (1mm), 1.5:Normal (1.5mm), 2:Big (2mm), 3:Bigger (3mm), 4:Hudge (5mm)]
-belt_idler = 1; // [0:No, 1:Yes]
+belt_idler = 0; // [0:No, 1:Yes]
 // Height of idler flange over pulley. Set to same as base height if you want an idler but no pulley.
 idler_height_p = 1.0; // [0.5:Tiny (0.5mm), 1:Small (1mm), 1.5:Normal (1.5mm), 2:Big (2mm), 3:Bigger (3mm), 4:Hudge (5mm)]
 
@@ -136,8 +136,9 @@ metric_nut_width_across_points = 2*((nut_width/2)/cos(30)); // This is needed fo
 //if ( profile == 10 ){pulley("HTD 5mm" , HTD_5mm_pulley_dia , 2.199 , 3.781 ); }
 //if ( profile == 11 ){pulley("HTD 8mm" , HTD_8mm_pulley_dia , 3.607 , 6.603 ); }
 // oldif ( profile == 12 ){pulley("GT2 2mm" , GT2_2mm_pulley_dia , 0.764 , 1.494, number_of_teeth_test ); }
-module pulley_gt2(number_of_teeth){
-  {pulley("GT2 2mm" , tooth_spacing (2,0.254, number_of_teeth) , 0.764 , 1.494, number_of_teeth); }
+module pulley_gt2(number_of_teeth,depth){
+
+  {pulley("GT2 2mm" , tooth_spacing (2,0.254, number_of_teeth) , 0.764 , 1.494, number_of_teeth, depth); }
 }
 //if ( profile == 13 ){pulley("GT2 3mm" , GT2_3mm_pulley_dia , 1.169 , 2.31 ); }
 //if ( profile == 14 ){pulley("GT2 5mm" , GT2_5mm_pulley_dia , 1.969 , 3.952 ); }
@@ -154,7 +155,7 @@ function tooth_spacing(tooth_pitch,pitch_line_offset, number_of_teeth)
 // ================================================================================
 // Main Module
 // ================================================================================
-module pulley( belt_type , pulley_OD , tooth_depth , tooth_width, number_of_teeth ){
+module pulley( belt_type , pulley_OD , tooth_depth , tooth_width, number_of_teeth,toothed_part_length ){
   echo (str("Belt type = ",belt_type,"; Number of teeth = ",number_of_teeth,"; Pulley Outside Diameter = ",pulley_OD,"mm "));
   tooth_distance_from_centre = sqrt( pow(pulley_OD/2,2) - pow((tooth_width+additional_tooth_width)/2,2));
   tooth_width_scale = (tooth_width + additional_tooth_width ) / tooth_width;

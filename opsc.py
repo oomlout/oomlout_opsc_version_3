@@ -379,24 +379,45 @@ def tube(params):
     return difference()(outside,inside)
 
 def gear(params):
-    number_of_teeth = params.get("number_of_teeth", 24)
-    circular_pitch = params.get("circular_pitch", False) # couldn't figure this one out
-    diametral_pitch = params.get("diametral_pitch", 0.533333) #(teeth / diameter mm) gear 15 mm wide has 8 teeth
-    pressure_angle = params.get("pressure_angle", 20) #internet thinks legos is about 20
-    clearance = params.get("clearance", 1)
-    gear_thickness = params.get("gear_thickness", None)
-    if gear_thickness == None:
-        gear_thickness = params.get("depth", 10)
-    rim_thickness = params.get("rim_thickness", gear_thickness)
-    rim_width = params.get("rim_width", 0)
-    hub_thickness = params.get("hub_thickness", 0)
-    hub_diameter = params.get("hub_diameter", 0)
-    bore_diameter = params.get("bore_diameter", 0)
-    circles = params.get("circles", 0)
-    backlash = params.get("backlash", 1)
-    twist = params.get("twist", 0)
-    involute_facets = params.get("involute_facets", 0)
-    flat = params.get("flat", False)
+    default = True
+    if default:
+        number_of_teeth = params.get("number_of_teeth", 24)
+        circular_pitch = params.get("circular_pitch", False) # couldn't figure this one out
+        diametral_pitch = params.get("diametral_pitch", 0.533333) #(teeth / diameter mm) gear 15 mm wide has 8 teeth
+        pressure_angle = params.get("pressure_angle", 20) #internet thinks legos is about 20
+        clearance = params.get("clearance", 0.5)
+        gear_thickness = params.get("gear_thickness", None)
+        if gear_thickness == None:
+            gear_thickness = params.get("depth", 10)
+        rim_thickness = params.get("rim_thickness", gear_thickness)
+        rim_width = params.get("rim_width", 0)
+        hub_thickness = params.get("hub_thickness", 0)
+        hub_diameter = params.get("hub_diameter", 0)
+        bore_diameter = params.get("bore_diameter", 0)
+        circles = params.get("circles", 0)
+        backlash = params.get("backlash", 0.5)
+        twist = params.get("twist", 0)
+        involute_facets = params.get("involute_facets", 0)
+        flat = params.get("flat", False)
+    else:
+        number_of_teeth = params.get("number_of_teeth", 24)
+        circular_pitch = params.get("circular_pitch", False) # couldn't figure this one out
+        diametral_pitch = params.get("diametral_pitch", 0.533333) #(teeth / diameter mm) gear 15 mm wide has 8 teeth
+        pressure_angle = params.get("pressure_angle", 35) #internet thinks legos is about 20
+        clearance = params.get("clearance", 0.5)
+        gear_thickness = params.get("gear_thickness", None)
+        if gear_thickness == None:
+            gear_thickness = params.get("depth", 10)
+        rim_thickness = params.get("rim_thickness", gear_thickness)
+        rim_width = params.get("rim_width", 0)
+        hub_thickness = params.get("hub_thickness", 0)
+        hub_diameter = params.get("hub_diameter", 0)
+        bore_diameter = params.get("bore_diameter", 0)
+        circles = params.get("circles", 0)
+        backlash = params.get("backlash", 0.5)
+        twist = params.get("twist", 0)
+        involute_facets = params.get("involute_facets", 0)
+        flat = params.get("flat", False)
 
     involute_gear = import_scad("MCAD/involute_gears.scad")
 
@@ -462,11 +483,18 @@ def d_shaft(kwargs):
     indent = copy.deepcopy(kwargs) 
     indent["shape"] = "cube"
     indent.pop("r","")
-    dif = radius*2-id
-    indent["size"] = [radius*2, dif, depth]
-    pos_shift = [0,dif,-depth]
-    indent["pos"]  = [pos[0] + pos_shift[0], pos[1] + pos_shift[1], pos[2] + pos_shift[2]]
+    dif = radius*2-(id)
+    width = radius*2
+    height = dif
+    depth = depth
+    indent["size"] = [width,height,depth]
+    pos1 = copy.deepcopy(pos)
+    pos1[0] += -radius
+    pos1[1] += radius - dif
+    pos1[2] += -depth
+    indent["pos"]  = pos1
     indent["type"] = typ_other
+    #indent["m"] = "#"
     indent_shape = get_opsc_item(indent)    
 
     return difference()(shaft_shape, indent_shape)
@@ -515,9 +543,10 @@ def slot(params):
 
 def pulley_gt2(params):
     number_of_teeth = params.get("number_of_teeth", 24)
+    depth = params.get("depth", 6)
     pulley_gt2_scad = import_scad("pulley_gt2.scad")
 
-    return pulley_gt2_scad.pulley_gt2(number_of_teeth=number_of_teeth)
+    return pulley_gt2_scad.pulley_gt2(number_of_teeth=number_of_teeth, depth=depth)
 
 def rounded_rectangle(params): 
     m = params.get("m", "")  

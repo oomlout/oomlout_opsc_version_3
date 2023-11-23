@@ -11,7 +11,7 @@ union() {
 				}
 				difference() {
 					union() {
-						pulley_gt2(number_of_teeth = 20);
+						pulley_gt2(depth = 2, number_of_teeth = 20);
 					}
 					union();
 				}
