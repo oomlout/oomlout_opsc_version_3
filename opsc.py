@@ -870,7 +870,11 @@ def polyg_tube_half(params):
 
 
 def polyg(params):
-    p2 = copy.deepcopy(params) 
+    p2 = copy.deepcopy(params)
+    p2.pop("rot", "")    
+    p2.pop("rotX", "")   
+    p2.pop("rotY", "")   
+    p2.pop("rotZ", "")   
     p2["type"] = "positive"
     p2["shape"] = "polygon"
     p2["pos"] = [0,0,0]
