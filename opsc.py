@@ -789,7 +789,10 @@ def bearing(params):
 
     if not exclude_clearance:        
         ei = get_opsc_item(extra_inner)
-        shape = translate([0,0,-depth/2])(union()(difference()(mo,mi), difference()(eo,ei)))
+        if id > 10: # make sure middle remains
+            shape = translate([0,0,-depth/2])(union()(difference()(mo,mi), difference()(eo,ei)))
+        else: #no need for middle on smaller bearings
+            shape = translate([0,0,-depth/2])(union()(difference()(mo,mi), difference()(eo)))
     else:
         ex = 4
         extra_inner["h"] = depth+ex
