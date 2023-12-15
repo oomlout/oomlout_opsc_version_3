@@ -521,25 +521,51 @@ def slot_small(params):
     return hull()(leftObj, rightObj)
 
 def slot(params):  
-    p2 = copy.deepcopy(params) 
-    if isinstance(p2['r'], str):
-        p2['r'] = radius_dict[p2['r']]
-    p2["type"] = "positive"
-    p2["shape"] = "hole"
-    try:
-        del p2["rot"]
-    except:
-        pass
-    p2["pos"] = [0,0,0]
-    left = copy.deepcopy(p2)
-    right = copy.deepcopy(p2)
-    left["pos"][0] = p2["w"] / 2 - p2["r"] 
+    p3 = copy.deepcopy(params) 
+    pos = p3.get("pos", [0,0,0])
+    width = p3.get("width", p3.get("w", 1))
+
+    #make radius_1 and radius_2 r1 and r2 and pop them
+    p3["r1"] = p3.get("radius_1", p3.get("r1", 0))
+    p3["r2"] = p3.get("radius_2", p3.get("r2", 0))
+
+    #pull named radiuses into p3
+    radiuses = ["r1", "r2", "r"]
+    for rad in radiuses:
+        test = p3.get(rad, "")
+        if isinstance(test, str) and test != "":
+            p3[rad] = radius_dict[p3[rad]]
+
+    #get radiuses
+    r = p3.get("r", "")
+    r1 = p3.get("r1", "")
+    r2 = p3.get("r2", "")
+
+    #for just r provided
+    if r != "":
+        r1 = r
+        p3["r1"] = r
+        r2 = r
+        p3["r2"] = r
+
     
-    right["pos"][0] = -p2["w"] / 2 + p2["r"] 
-    pass
+    p3["type"] = "positive"
+    p3["shape"] = "cylinder"
+    
+    pos1 = copy.deepcopy(pos)
+    left = copy.deepcopy(p3)
+    pos_left = copy.deepcopy(pos1)
+    pos_left[0] += width / 2
+    left["pos"] = pos_left
+    #left["m"] = "#"
+    right = copy.deepcopy(p3)
+    pos_right = copy.deepcopy(pos1)
+    pos_right[0] += -width / 2
+    right["pos"] = pos_right
+
     leftObj = get_opsc_item(left)
     rightObj = get_opsc_item(right)
-    return hull()(leftObj, rightObj)
+    return hull()(leftObj, rightObj).set_modifier(p3.get("m", ""))
 
 def pulley_gt2(params):
     number_of_teeth = params.get("number_of_teeth", 24)
@@ -760,13 +786,22 @@ def bearing(params):
     od = params["od"]
     pos = params["pos"]
     depth = params["depth"]
-    clearance_original = params.get("clearance", 2)
+    clearance_bearing_original = params.get("clearance_bearing", 2)
+    clearance = params.get("clearance", "")
 
+    depth_bearing = depth
+    if clearance != "":
+        depth_bearing = depth + 250
     p2["shape"] = "cylinder"
-    p2["h"] = depth
+    p2["h"] = depth_bearing
     main_inner = copy.deepcopy(p2)
     main_inner["r"] = id
     main_outer = copy.deepcopy(p2)
+    pos1 = copy.deepcopy(pos)
+    if clearance == "bottom":
+        pos1[2] += -depth_bearing
+
+    main_outer["pos"] = pos1
     main_outer["r"] = od
     
     ## Extra clearance
@@ -775,12 +810,12 @@ def bearing(params):
     extra_inner = copy.deepcopy(p2)
     extra_outer = copy.deepcopy(p2)
 
-    clearance = (od - id - clearance_original/2 )
+    clearance_bearing = (od - id - clearance_bearing_original/2 )
     exclude_clearance = params.get("exclude_clearance", False)
 
     
-    extra_inner["r"] = id + clearance/2
-    extra_outer["r"] = od - clearance/2
+    extra_inner["r"] = id + clearance_bearing/2
+    extra_outer["r"] = od - clearance_bearing/2
 
     mi = get_opsc_item(main_inner)
     mo = get_opsc_item(main_outer)
@@ -807,6 +842,7 @@ def bearing(params):
 
 def oring(params):
     p2 = copy.deepcopy(params) 
+    m = params.get("m", "")
     id = params["id"]
     depth = params["depth"]    
 
@@ -814,7 +850,7 @@ def oring(params):
     p2["h"] = depth
 
     rot_rad = id + depth/2
-    rv = rotate_extrude(angle=360)(translate([rot_rad,0,0])(circle(r=depth/2)))
+    rv = rotate_extrude(angle=360)(translate([rot_rad,0,0])(circle(r=depth/2))).set_modifier(m)   
 
     return rv
 
@@ -1047,6 +1083,7 @@ def saveToFileAll(fileIn, extra="", render=True):
 
 def getLaser(final_object,start=1.5,layers=1,thickness=3,tilediff=200):
         rv= []
+        layers = max(1,layers)
         for x in range(int(layers)):
             rv.append(translate([0,x*tilediff,0])(
                     projection()(
