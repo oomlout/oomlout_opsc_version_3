@@ -1,6 +1,8 @@
 $fn = 30;
 
 
+//source https://www.thingiverse.com/thing:8348
+
 lobe_number = 30;
 radius_offset = 1.5;
 radius_pin = 6/2;
