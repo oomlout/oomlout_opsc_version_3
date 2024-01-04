@@ -318,7 +318,7 @@ def opsc_easy(type, shape, **kwargs):
     params_allowed = []
     params_base = ['color','center','comment','size', 'r', 'radius', 'r1', 'r2', 'd', 'h', 'rw', 'rh', 'dw', 'dh', 'pos', 'x', 'y', 'z', 'rot', 'rotX', 'rotY', 'rotZ', "w", "inclusion", 'sides', 'height', 'width', "m", "id", "od", "depth", "exclude_clearance", "clearance", "points","text","valign","halign","font","inset","wall_thickness","extra","wall_thickness", "loc", "objects"]
     params_allowed.extend(params_base)
-    params_gear = ['number_of_teeth', 'circular_pitch', 'diametral_pitch', 'pressure_angle', 'clearance', 'gear_thickness', 'rim_thickness', 'rim_width', 'hub_thickness', 'hub_diameter', 'bore_diameter', 'circles', 'backlash', 'twist', 'involute_facets', 'flat', "lobe_number", "radius_offset", "radius_pin"]
+    params_gear = ['number_of_teeth', 'circular_pitch', 'diametral_pitch', 'pressure_angle', 'clearance', 'gear_thickness', 'rim_thickness', 'rim_width', 'hub_thickness', 'hub_diameter', 'bore_diameter', 'circles', 'backlash', 'twist', 'involute_facets', 'flat', "lobe_number", "radius_offset", "radius_pin", "offset"]
     params_allowed.extend(params_gear)
     for param in params_allowed:
         if param in kwargs:
@@ -778,12 +778,16 @@ def sphere_rectangle(params):
     return hull()(tlo, tro, blo, bro).set_modifier(m)
 
 def cycloid(kwargs):
+    offset_value = kwargs.get("offset", 0)
     lobe_number = kwargs.get("lobe_number", 3)
     radius_offset = kwargs.get("radius_offset", 10)
     radius_pin = kwargs.get("radius_pin", 5)    
     scad_file = import_scad("cycloid.scad")
     depth = kwargs.get("depth", 10)
-    return linear_extrude(depth)(scad_file.cycloid(lobe_number=lobe_number, radius_offset=radius_offset, radius_pin=radius_pin))
+    if offset != 0:        
+        return linear_extrude(depth)(scad_file.cycloid(lobe_number=lobe_number, radius_offset=radius_offset, radius_pin=radius_pin))
+    else:
+        return linear_extrude(depth)(offset(offset_value)(scad_file.cycloid(lobe_number=lobe_number, radius_offset=radius_offset, radius_pin=radius_pin)))
 
 
 def bearing(params):
