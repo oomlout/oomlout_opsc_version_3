@@ -784,7 +784,7 @@ def cycloid(kwargs):
     radius_pin = kwargs.get("radius_pin", 5)    
     scad_file = import_scad("cycloid.scad")
     depth = kwargs.get("depth", 10)
-    if offset != 0:        
+    if offset_value == 0:        
         return linear_extrude(depth)(scad_file.cycloid(lobe_number=lobe_number, radius_offset=radius_offset, radius_pin=radius_pin))
     else:
         return linear_extrude(depth)(offset(offset_value)(scad_file.cycloid(lobe_number=lobe_number, radius_offset=radius_offset, radius_pin=radius_pin)))
