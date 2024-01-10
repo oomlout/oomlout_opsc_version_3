@@ -203,7 +203,7 @@ module pulley( belt_type , pulley_OD , tooth_depth , tooth_width, number_of_teet
                 if ( profile == 9  ) { HTD_3mm();}
                 if ( profile == 10 ) { HTD_5mm();}
                 if ( profile == 11 ) { HTD_8mm();}
-                if ( profile == 12 ) { #GT2_2mm(toothed_part_length);}
+                if ( profile == 12 ) { GT2_2mm(toothed_part_length);}
                 if ( profile == 13 ) { GT2_3mm();}
                 if ( profile == 14 ) { GT2_5mm();}
                 }
