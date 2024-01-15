@@ -797,6 +797,7 @@ def bearing(params):
     od = params["od"]
     pos = params["pos"]
     depth = params["depth"]
+    depth_extra = params.get("depth_extra", 100)
     clearance_bearing_original = params.get("clearance_bearing", 2)
     clearance = params.get("clearance", "")
 
@@ -841,8 +842,9 @@ def bearing(params):
             shape = translate([0,0,-depth/2])(union()(difference()(mo,mi), difference()(eo)))
     else:
         ex = 4
-        extra_inner["h"] = depth+ex
-        extra_inner["pos"] = [pos[0], pos[1], pos[2] - ex/2]
+        extra_inner["h"] = depth+ex+depth_extra
+        extra_inner["pos"] = [pos[0], pos[1], pos[2] - ex/2 - depth_extra/2]
+        
         ei = get_opsc_item(extra_inner)
         shape = translate([0,0,-depth/2])(mo, ei)
     return shape
