@@ -140,6 +140,7 @@ def opsc_get_object(objects, mode = "laser"):
                         opsc_item = get_opsc_item(obj)
                         types[typ].append(opsc_item)
                     else:
+                        obj_original = copy.deepcopy(obj)
                         typtyp = obj.get('typetype',"p")
                         objects_2 = obj.get('objects',[])
                         pos = copy.deepcopy(obj.get('pos',[0,0,0]))
@@ -171,7 +172,17 @@ def opsc_get_object(objects, mode = "laser"):
                             obj.pop('rot_x', None)
                             obj.pop('rot_y', None)
                             obj.pop('rot_z', None)
+                        
+                        
+
                         opsc_objects = translate(pos)(rotate(a=rot)((opsc_objects)))
+
+                        # dealing with rot_shift
+                        rot_shift = obj_original.get('rot_shift', [])
+                        if rot_shift != []:
+                            opsc_objects = rotate(rot_shift[1])(translate(rot_shift[0])(opsc_objects))
+
+
                         if typtyp == "p" or typtyp == "positive":
                             types["positive"].append(opsc_objects)
                         elif typtyp == "n" or typtyp == "negative":
@@ -183,7 +194,13 @@ def opsc_get_object(objects, mode = "laser"):
             if obj == None:
                 types[typ].remove(obj)
                 print("removed None")
-            
+    # remvoe a doubble none
+    for typ in types:
+        for obj in types[typ]:
+            #remove any None
+            if obj == None:
+                types[typ].remove(obj)
+                print("removed None")       
         
     positive_object = union()(*types["positive"])
     # Union the negative objects
@@ -241,6 +258,7 @@ def get_opsc_item(params):
         return_value = get_opsc_transform(params,linear_extrude(h)(globals()[params['shape']](**shape_params)))
         return_value = (return_value).set_modifier(m)
         return return_value
+    
     elif params['shape'] == 'text':        
         h  = params.get('height',params.get("h", params.get("depth", 10)))
         center = params.get('center', False)
@@ -265,10 +283,12 @@ def get_opsc_item(params):
         p2["pos"] = [0,0,0]
         return get_opsc_transform(params,globals()[params['shape']](p2))
 
+
 def get_opsc_transform(params, solid_obj):
     # Rotate the object based on the 'rot' field in the params dictionary, or the 'rotX', 'rotY', and 'rotZ' fields if 'rot' is not present
     col = params.get('color', "")
     rot = params.get('rot', [])
+    rot_shift = params.get('rot_shift', [])
     if rot:
         rotX, rotY, rotZ = rot
     else:
@@ -290,8 +310,18 @@ def get_opsc_transform(params, solid_obj):
     translation = [x, y, z]
     if translation != [0, 0, 0]:
         solid_obj = translate(translation)(solid_obj)
+    
+    # color
     if col != "":
         solid_obj = color(c=col)(solid_obj)
+    
+    # add a rotation shift
+    if rot_shift != []:
+        rot_shift_shift = rot_shift[0]
+        rot_shift_rot = rot_shift[1]
+        solid_obj = rotate(rot_shift_rot)(translate(rot_shift_shift)(solid_obj))
+    
+    
     return solid_obj
 
 
@@ -316,7 +346,7 @@ def opsc_easy(type, shape, **kwargs):
         'shape': shape
     }
     params_allowed = []
-    params_base = ['color','center','comment','size', 'r', 'radius', 'r1', 'r2', 'd', 'h', 'rw', 'rh', 'dw', 'dh', 'pos', 'x', 'y', 'z', 'rot', 'rotX', 'rotY', 'rotZ', "w", "inclusion", 'sides', 'height', 'width', "m", "id", "od", "depth", "exclude_clearance", "clearance", "points","text","valign","halign","font","inset","wall_thickness","extra","wall_thickness", "loc", "objects"]
+    params_base = ['color','center','comment','size', 'r', 'radius', 'r1', 'r2', 'd', 'h', 'rw', 'rh', 'dw', 'dh', 'pos', 'x', 'y', 'z', 'rot', 'rotX', 'rotY', 'rotZ', "w", "inclusion", 'sides', 'height', 'width', "m", "id", "od", "depth", "exclude_clearance", "clearance", "points","text","valign","halign","font","inset","wall_thickness","extra","wall_thickness", "loc", "objects","rot_shift"]
     params_allowed.extend(params_base)
     params_gear = ['number_of_teeth', 'circular_pitch', 'diametral_pitch', 'pressure_angle', 'clearance', 'gear_thickness', 'rim_thickness', 'rim_width', 'hub_thickness', 'hub_diameter', 'bore_diameter', 'circles', 'backlash', 'twist', 'involute_facets', 'flat', "lobe_number", "radius_offset", "radius_pin", "offset"]
     params_allowed.extend(params_gear)
@@ -339,8 +369,8 @@ def hole(params):
     
     # Set the height to 100 if not specified
     if 'h' not in p2:
-        p2['h'] = 100
-        p2["pos"] = [0,0,-50]
+        p2['h'] = 200
+        p2["pos"] = [0,0,-100]
     p2["center"] = True
     # Create the cylinder object
     p2["shape"] = "cylinder"
@@ -863,7 +893,7 @@ def oring(params):
     p2["h"] = depth
 
     rot_rad = id + depth/2
-    rv = rotate_extrude(angle=360)(translate([rot_rad,0,0])(circle(r=depth/2))).set_modifier(m)   
+    rv = (rotate_extrude(angle=360)(translate([rot_rad,0,0])(circle(r=depth/2)))).set_modifier(m)   
 
     return rv
 
