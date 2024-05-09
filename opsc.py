@@ -220,7 +220,7 @@ def get_opsc_item(params):
     # An array of function names for basic shapes
     basic_shapes = ['cube', 'sphere', 'cylinder']
     # An array of function names for other shapes
-    other_shapes = ['hole', 'slot', 'slot_small', 'text_hollow', "tube", 'tray', 'rounded_rectangle', 'rounded_rectangle_extra', 'sphere_rectangle', 'countersunk', 'polyg', 'polyg_tube', 'polyg_tube_half', 'bearing', 'oring', 'vpulley', 'd_shaft', 'gear', 'pulley_gt2', "cycloid"]
+    other_shapes = ['hole', 'slot', 'slot_small', 'text_hollow', "tube", "tube_new", 'tray', 'rounded_rectangle', 'rounded_rectangle_extra', 'sphere_rectangle', 'countersunk', 'polyg', 'polyg_tube', 'polyg_tube_half', 'bearing', 'oring', 'vpulley', 'd_shaft', 'gear', 'pulley_gt2', "cycloid"]
 
     # Convert radius to r if present, and remove radius from the params dictionary
     if 'radius' in params:
@@ -407,6 +407,36 @@ def tube(params):
     p2["r"] = p2["r"] + p2["wall_thickness"]    
     outside = get_opsc_item(p2)
     return difference()(outside,inside)
+
+def tube_new(params):
+    p2 = copy.deepcopy(params)
+    if "wall_thickness" not in p2:        
+        p2["wall_thickness"] = 1
+    if "r1" in params:        
+        
+        # Set the height to 100 if not specified
+        if 'h' not in p2:
+            if 'height' in p2:
+                p2['h'] = p2['height']
+            elif 'depth' in p2:
+                p2['h'] = p2['depth']
+            else:
+                p2['h'] = 100
+                p2["pos"] = [0,0,-50]
+        p2["center"] = True
+        # Create the cylinder object
+        p2["shape"] = "cylinder"
+        p2["type"] = "negative"
+        inside = get_opsc_item(p2) 
+        p2 = copy.deepcopy(p2)
+        p2["type"] = "positive"
+        p2["r1"] = p2["r1"] + p2["wall_thickness"]    
+        p2["r2"] = p2["r2"] + p2["wall_thickness"]
+        outside = get_opsc_item(p2)
+        return difference()(outside,inside)
+    else:
+        return tube(params)
+    
 
 def gear(params):
     default = True
