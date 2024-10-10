@@ -131,11 +131,11 @@ def opsc_get_object(objects, mode = "laser"):
             if test_type == "p":
                 obj['type'] = "positive"
             elif test_type == "n":
-                obj['type'] = "negative"           
+                obj['type'] = "negative"          
             
             if obj['type'] == typ:
                 inclusion = obj.get('inclusion',"all")
-                if inclusion == "all" or inclusion == mode:
+                if inclusion == "all" or inclusion == mode:                    
                     if typ != "rotation":
                         opsc_item = get_opsc_item(obj)
                         types[typ].append(opsc_item)
@@ -220,7 +220,7 @@ def get_opsc_item(params):
     # An array of function names for basic shapes
     basic_shapes = ['cube', 'sphere', 'cylinder']
     # An array of function names for other shapes
-    other_shapes = ['hole', 'slot', 'slot_small', 'text_hollow', "tube", "tube_new", 'tray', 'rounded_rectangle', 'rounded_rectangle_extra', 'sphere_rectangle', 'countersunk', 'polyg', 'polyg_tube', 'polyg_tube_half', 'bearing', 'oring', 'vpulley', 'd_shaft', 'gear', 'pulley_gt2', "cycloid"]
+    other_shapes = ['hole', 'slot', 'slot_small', 'text_hollow', "tube", "tube_new", 'tray', 'rounded_rectangle', 'rounded_octagon','rounded_rectangle_extra', 'sphere_rectangle', 'countersunk', 'polyg', 'polyg_tube', 'polyg_tube_half', 'bearing', 'oring', 'vpulley', 'd_shaft', 'gear', 'pulley_gt2', "cycloid"]
 
     # Convert radius to r if present, and remove radius from the params dictionary
     if 'radius' in params:
@@ -670,6 +670,57 @@ def rounded_rectangle(params):
     bro = get_opsc_item(br)    
     return hull()(tlo, tro, blo, bro).set_modifier(m)
 
+def rounded_octagon(params): 
+    width = params.get("width", 10)
+    width = width / 0.92388    
+    radius = params.get("r", 5)
+    depth = params.get("depth", 10)
+
+    params = copy.deepcopy(params)
+    params.pop("radius",None)
+    params.pop("width",None)
+    params.pop("depth",None)
+
+
+    params["h"] = depth
+
+    pos = params.get("pos", [0, 0, 0])
+
+    m = params.get("m", "")  
+    
+    p2 = copy.deepcopy(params) 
+    p2["m"] = ""    
+    p2["pos"] = p2.get("pos", [0, 0, 0]) 
+    p2["type"] = "positive"
+    p2["shape"] = "hole"
+    p2["pos"] = copy.deepcopy(pos)
+    
+    if 'rot' in p2:
+        del p2["rot"]   
+    if 'r' not in p2:
+        p2["r"] = 5 
+
+    #figure out the points on the octagon
+    import math
+    points = []
+    for i in range(0,8):
+        x = math.cos(math.radians(i*45+ 45/2)) * (width/2 - radius)
+        y = math.sin(math.radians(i*45+ 45/2)) * (width/2 - radius)
+        points.append([x,y])
+
+    #create the points
+    cylinders = []
+    for i in range(0,8):
+        p3 = copy.deepcopy(p2)
+        pos1 = copy.deepcopy(p2["pos"])
+        pos1[0] += points[i][0]
+        pos1[1] += points[i][1]
+        p3["pos"] = pos1
+        cylinders.append(get_opsc_item(p3))
+
+
+    return hull()(cylinders).set_modifier(m)
+
 
 def tray(params):
     wall_thickness = params.get("wall_thickness", 1)
@@ -977,9 +1028,6 @@ def polyg_tube_half(params):
     item = difference()(item,cut_cube)
     #item = get_opsc_transform(params,item)
     return item
-
-
-
 
 def polyg(params):
     p2 = copy.deepcopy(params)
