@@ -346,7 +346,7 @@ def opsc_easy(type, shape, **kwargs):
         'shape': shape
     }
     params_allowed = []
-    params_base = ['color','center','comment','size', 'r', 'radius', 'r1', 'r2', 'd', 'h', 'rw', 'rh', 'dw', 'dh', 'pos', 'x', 'y', 'z', 'rot', 'rotX', 'rotY', 'rotZ', "w", "inclusion", 'sides', 'height', 'width', "m", "id", "od", "depth", "exclude_clearance", "clearance", "points","text","valign","halign","font","inset","wall_thickness","extra","wall_thickness", "loc", "objects","rot_shift"]
+    params_base = ['color','center','comment','size', 'r', 'radius', 'r1', 'r2', 'd', 'h', 'rw', 'rh', 'dw', 'dh', 'pos', 'x', 'y', 'z', 'rot', 'rotX', 'rotY', 'rotZ', "w", "inclusion", 'sides', 'height', 'width', "m", "id", "od", "depth", "exclude_clearance", "clearance", "points","text","valign","halign","font","inset","wall_thickness","extra","wall_thickness", "loc", "locs", "location", "locations", "objects","rot_shift","extra_clearance"]
     params_allowed.extend(params_base)
     params_gear = ['number_of_teeth', 'circular_pitch', 'diametral_pitch', 'pressure_angle', 'clearance', 'gear_thickness', 'rim_thickness', 'rim_width', 'hub_thickness', 'hub_diameter', 'bore_diameter', 'circles', 'backlash', 'twist', 'involute_facets', 'flat', "lobe_number", "radius_offset", "radius_pin", "offset", "clearance_bearing"]
     params_allowed.extend(params_gear)
@@ -1035,13 +1035,19 @@ def polyg(params):
     p2.pop("rotX", "")   
     p2.pop("rotY", "")   
     p2.pop("rotZ", "")   
+
     p2["type"] = "positive"
     p2["shape"] = "polygon"
     p2["pos"] = [0,0,0]
     sides = p2.get("sides", 6)
     radius = p2["r"]    
+    extra_clearance = p2.get("extra_clearance", 0)
+    if extra_clearance != 0:
+        h = p2.get("height", 0)
+        p2["height"] = h + extra_clearance
+    radius_full = radius + extra_clearance/2
     angles = [i * 360 / sides for i in range(sides)]
-    points = regular_polygon(sides, radius)
+    points = regular_polygon(sides, radius_full)
     
     p2["points"] = points
     return get_opsc_item(p2)
