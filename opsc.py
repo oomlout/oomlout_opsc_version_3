@@ -753,7 +753,7 @@ def rounded_rectangle_extra(params):
     inset = params.get("inset", 0)
     radius = params.get("r", 5)
     rotY = params.get("rotY", 0)
-    params.pop("r")    
+    params.pop("r","")    
     
     params["r1"] = radius
     params["r2"] = radius - inset/2
