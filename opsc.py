@@ -187,6 +187,10 @@ def opsc_get_object(objects, mode = "laser"):
                             types["positive"].append(opsc_objects)
                         elif typtyp == "n" or typtyp == "negative":
                             types["negative"].append(opsc_objects)
+                        elif typtyp == "pp" or typtyp == "positive_positive":
+                            types["positive_positive"].append(opsc_objects)
+                        elif typtyp == "nn" or typtyp == "negative_negative":
+                            types["negative_negative"].append(opsc_objects)
 
     for typ in types:
         for obj in types[typ]:
