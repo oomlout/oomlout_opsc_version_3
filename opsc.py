@@ -145,6 +145,7 @@ def opsc_get_object(objects, mode = "laser"):
                         objects_2 = obj.get('objects',[])
                         pos = copy.deepcopy(obj.get('pos',[0,0,0]))
                         rot = obj.get('rot',"")
+                        m_original = obj.get('m',"")
                         pass
                         # expand object list
                         for i in range(8):
@@ -175,7 +176,7 @@ def opsc_get_object(objects, mode = "laser"):
                         
                         
 
-                        opsc_objects = translate(pos)(rotate(a=rot)((opsc_objects)))
+                        opsc_objects = translate(pos)(rotate(a=rot)((opsc_objects))).set_modifier(m_original)
 
                         # dealing with rot_shift
                         rot_shift = obj_original.get('rot_shift', [])
