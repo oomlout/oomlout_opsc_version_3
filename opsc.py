@@ -223,7 +223,7 @@ def opsc_get_object(objects, mode = "laser"):
 
 def get_opsc_item(params):
     # An array of function names for basic shapes
-    basic_shapes = ['cube', 'sphere', 'cylinder']
+    basic_shapes = ['cube', 'sphere', 'cylinder', 'import_stl']
     # An array of function names for other shapes
     other_shapes = ['hole', 'slot', 'slot_small', 'text_hollow', "tube", "tube_new", 'tray', 'rounded_rectangle', 'rounded_octagon','rounded_rectangle_extra', 'sphere_rectangle', 'countersunk', 'polyg', 'polyg_tube', 'polyg_tube_half', 'bearing', 'oring', 'vpulley', 'd_shaft', 'gear', 'pulley_gt2', "cycloid"]
 
@@ -238,12 +238,17 @@ def get_opsc_item(params):
     
 
     if params['shape'] in basic_shapes:
-        # Remove shape and unexpected dictionary values
-        allowed_keys = {'size', 'r', 'r1', 'r2', 'd', 'h', 'rw', 'rh', 'dw', 'dh'}
+        shape = params['shape']
+        if shape != "import_stl":
+            # Remove shape and unexpected dictionary values
+            allowed_keys = {'size', 'r', 'r1', 'r2', 'd', 'h', 'rw', 'rh', 'dw', 'dh'}
+        if shape == "import_stl":
+            allowed_keys = {'file', 'center', 'convexity', 'scale'}
         shape_params = {k: v for k, v in params.items() if k in allowed_keys}
 
         m = params.get('m', '')
         func = globals()[params['shape']]
+        
         return_value = get_opsc_transform(params,func(**shape_params))
         return_value = (return_value).set_modifier(m)
         return return_value
@@ -270,7 +275,7 @@ def get_opsc_item(params):
         if center:
             params['halign'] = 'center'
             params['valign'] = 'center'
-        allowed_keys = {'text', 'size', 'font', 'halign', 'valign', 'spacing', 'direction', 'language', 'script'}
+        allowed_keys = {'text', 'size', 'font', 'halign', 'valign', 'spacing', 'direction', 'language', 'script', 'file'}
         shape_params = {k: v for k, v in params.items() if k in allowed_keys}
         m = params.get('m', '')
         func = globals()[params['shape']]
@@ -351,7 +356,7 @@ def opsc_easy(type, shape, **kwargs):
         'shape': shape
     }
     params_allowed = []
-    params_base = ['color','center','comment','size', 'r', 'radius', 'r1', 'r2', 'd', 'h', 'rw', 'rh', 'dw', 'dh', 'pos', 'x', 'y', 'z', 'rot', 'rotX', 'rotY', 'rotZ', "w", "inclusion", 'sides', 'height', 'width', "m", "id", "od", "depth", "exclude_clearance", "clearance", "points","text","valign","halign","font","inset","wall_thickness","extra","wall_thickness", "loc", "locs", "location", "locations", "objects","rot_shift","extra_clearance"]
+    params_base = ['color','center','comment','size', 'r', 'radius', 'r1', 'r2', 'd', 'h', 'rw', 'rh', 'dw', 'dh', 'pos', 'x', 'y', 'z', 'rot', 'rotX', 'rotY', 'rotZ', "w", "inclusion", 'sides', 'height', 'width', "m", "id", "od", "depth", "exclude_clearance", "clearance", "points","text","valign","halign","font","inset","wall_thickness","extra","wall_thickness", "loc", "locs", "location", "locations", "objects","rot_shift","extra_clearance","file"]
     params_allowed.extend(params_base)
     params_gear = ['number_of_teeth', 'circular_pitch', 'diametral_pitch', 'pressure_angle', 'clearance', 'gear_thickness', 'rim_thickness', 'rim_width', 'hub_thickness', 'hub_diameter', 'bore_diameter', 'circles', 'backlash', 'twist', 'involute_facets', 'flat', "lobe_number", "radius_offset", "radius_pin", "offset", "clearance_bearing"]
     params_allowed.extend(params_gear)
